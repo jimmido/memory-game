@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Game</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 100px);
+            grid-gap: 10px;
+        }
+
+        .card {
+            width: 100px;
+            height: 100px;
+            background-color: #333;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            cursor: pointer;
+            position: relative;
+            perspective: 1000px;
+        }
+
+        .card .inner {
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            position: relative;
+        }
+
+        .card.flipped .inner {
+            transform: rotateY(180deg);
+        }
+
+        .card .front,
+        .card .back {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            backface-visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card .back {
+            background-color: #f9f9f9;
+            color: black;
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body>
+    <h1>Memory Game</h1>
+    <div class="game-board" id="gameBoard"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const gameBoard = document.getElementById('gameBoard');
+            const cardsArray = [
+                { name: 'A', img: 'A' },
+                { name: 'A', img: 'A' },
+                { name: 'B', img: 'B' },
+                { name: 'B', img: 'B' },
+                { name: 'C', img: 'C' },
+                { name: 'C', img: 'C' },
+                { name: 'D', img: 'D' },
+                { name: 'D', img: 'D' },
+                { name: 'E', img: 'E' },
+                { name: 'E', img: 'E' },
+                { name: 'F', img: 'F' },
+                { name: 'F', img: 'F' },
+                { name: 'G', img: 'G' },
+                { name: 'G', img: 'G' },
+                { name: 'H', img: 'H' },
+                { name: 'H', img: 'H' }
+            ];
+
+            cardsArray.sort(() => 0.5 - Math.random());
+
+            let chosenCards = [];
+            let chosenCardsIds = [];
+            let cardsWon = [];
+
+            function createBoard() {
+                for (let i = 0; i < cardsArray.length; i++) {
+                    const card = document.createElement('div');
+                    card.classList.add('card');
+                    card.dataset.id = i;
+                    card.addEventListener('click', flipCard);
+                    card.innerHTML = `
+                        <div class="inner">
+                            <div class="front"></div>
+                            <div class="back">${cardsArray[i].img}</div>
+                        </div>
+                    `;
+                    gameBoard.appendChild(card);
+                }
+            }
+
+            function flipCard() {
+                const cardId = this.dataset.id;
+                chosenCards.push(cardsArray[cardId].name);
+                chosenCardsIds.push(cardId);
+                this.classList.add('flipped');
+                if (chosenCards.length === 2) {
+                    setTimeout(checkForMatch, 500);
+                }
+            }
+
+            function checkForMatch() {
+                const cards = document.querySelectorAll('.card');
+                const optionOneId = chosenCardsIds[0];
+                const optionTwoId = chosenCardsIds[1];
+
+                if (chosenCards[0] === chosenCards[1] && optionOneId !== optionTwoId) {
+                    cards[optionOneId].removeEventListener('click', flipCard);
+                    cards[optionTwoId].removeEventListener('click', flipCard);
+                    cardsWon.push(chosenCards);
+                } else {
+                    cards[optionOneId].classList.remove('flipped');
+                    cards[optionTwoId].classList.remove('flipped');
+                }
+
+                chosenCards = [];
+                chosenCardsIds = [];
+
+                if (cardsWon.length === cardsArray.length / 2) {
+                    setTimeout(() => alert('Congratulations! You found all pairs!'), 500);
+                }
+            }
+
+            createBoard();
+        });
+    </script>
+</body>
+</html>
